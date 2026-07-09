@@ -20,6 +20,11 @@ import ManageMessages from './pages/ManageMessages';
 import ManageBlogs from './pages/ManageBlogs';
 import ManageGallery from './pages/ManageGallery';
 import ManageSettings from './pages/ManageSettings';
+import ManageMedicalRecords from './pages/ManageMedicalRecords';
+import ManageFAQs from './pages/ManageFAQs';
+
+// Public Pages Additional
+import DoctorDetail from './pages/DoctorDetail';
 
 // Components
 import ProtectedRoute from './components/ProtectedRoute';
@@ -36,6 +41,7 @@ function App() {
         <Route path="/about" element={<Home initialSection="about" />} />
         <Route path="/services" element={<Home initialSection="services" />} />
         <Route path="/contact" element={<Home initialSection="contact" />} />
+        <Route path="/doctors/:id" element={<DoctorDetail />} />
 
 
         {/* ================= USER AUTH ================= */}
@@ -78,6 +84,11 @@ function App() {
             />
 
             <Route 
+              path="medical-records" 
+              element={<ManageMedicalRecords />} 
+            />
+
+            <Route 
               path="messages" 
               element={<ManageMessages />} 
             />
@@ -90,6 +101,11 @@ function App() {
             <Route 
               path="gallery" 
               element={<ManageGallery />} 
+            />
+
+            <Route 
+              path="faqs" 
+              element={<ManageFAQs />} 
             />
 
             <Route 

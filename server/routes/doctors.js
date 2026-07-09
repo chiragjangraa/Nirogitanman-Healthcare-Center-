@@ -23,22 +23,62 @@ router.get('/', async (req, res) => {
   }
 });
 
+// @route   GET api/doctors/:id
+// @desc    Get doctor by ID
+// @access  Public
+router.get('/:id', async (req, res) => {
+  try {
+    let doctor;
+    if (dbState.isMock) {
+      doctor = mockDb.findById('doctors', req.params.id);
+    } else {
+      doctor = await Doctor.findById(req.params.id);
+    }
+
+    if (!doctor) {
+      return res.status(404).json({ message: 'Doctor not found' });
+    }
+    res.json(doctor);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 // @route   POST api/doctors
 // @desc    Add a new doctor
-// @access  Private
+// @access  Private (Admin only)
 router.post('/', auth, async (req, res) => {
-  const { name, specialization, qualification, image, description } = req.body;
+  const { name, specialization, qualification, image, description, experienceYears, availableTimings, status } = req.body;
 
   if (!name || !specialization || !qualification || !image || !description) {
-    return res.status(400).json({ message: 'Please include all fields' });
+    return res.status(400).json({ message: 'Please include all required fields' });
   }
 
   try {
     let newDoc;
     if (dbState.isMock) {
-      newDoc = mockDb.create('doctors', { name, specialization, qualification, image, description });
+      newDoc = mockDb.create('doctors', { 
+        name, 
+        specialization, 
+        qualification, 
+        image, 
+        description,
+        experienceYears: Number(experienceYears) || 5,
+        availableTimings: availableTimings || ["09:00 AM - 12:00 PM", "02:00 PM - 05:00 PM"],
+        status: status || 'Available'
+      });
     } else {
-      newDoc = new Doctor({ name, specialization, qualification, image, description });
+      newDoc = new Doctor({ 
+        name, 
+        specialization, 
+        qualification, 
+        image, 
+        description,
+        experienceYears: Number(experienceYears) || 5,
+        availableTimings: availableTimings || ["09:00 AM - 12:00 PM", "02:00 PM - 05:00 PM"],
+        status: status || 'Available'
+      });
       await newDoc.save();
     }
     res.status(201).json(newDoc);
@@ -50,18 +90,27 @@ router.post('/', auth, async (req, res) => {
 
 // @route   PUT api/doctors/:id
 // @desc    Update doctor details
-// @access  Private
+// @access  Private (Admin only)
 router.put('/:id', auth, async (req, res) => {
-  const { name, specialization, qualification, image, description } = req.body;
+  const { name, specialization, qualification, image, description, experienceYears, availableTimings, status } = req.body;
 
   try {
     let updatedDoc;
     if (dbState.isMock) {
-      updatedDoc = mockDb.findByIdAndUpdate('doctors', req.params.id, { name, specialization, qualification, image, description });
+      updatedDoc = mockDb.findByIdAndUpdate('doctors', req.params.id, { 
+        name, 
+        specialization, 
+        qualification, 
+        image, 
+        description,
+        experienceYears: Number(experienceYears),
+        availableTimings,
+        status
+      });
     } else {
       updatedDoc = await Doctor.findByIdAndUpdate(
         req.params.id,
-        { name, specialization, qualification, image, description },
+        { name, specialization, qualification, image, description, experienceYears: Number(experienceYears), availableTimings, status },
         { new: true, runValidators: true }
       );
     }
@@ -78,7 +127,7 @@ router.put('/:id', auth, async (req, res) => {
 
 // @route   DELETE api/doctors/:id
 // @desc    Delete a doctor
-// @access  Private
+// @access  Private (Admin only)
 router.delete('/:id', auth, async (req, res) => {
   try {
     let deletedDoc;

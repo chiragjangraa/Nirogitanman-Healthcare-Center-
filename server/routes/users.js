@@ -210,4 +210,25 @@ router.put('/profile', auth, async (req, res) => {
   }
 });
 
+// @route   GET api/users
+// @desc    Get all users (Admin only)
+// @access  Private
+router.get('/', auth, async (req, res) => {
+  try {
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ message: 'Access denied: Admin only' });
+    }
+    let users;
+    if (dbState.isMock) {
+      users = mockDb.find('users');
+    } else {
+      users = await User.find({ role: { $ne: 'admin' } }).select('-password').sort({ createdAt: -1 });
+    }
+    res.json(users);
+  } catch (err) {
+    console.error('Fetch users error:', err.message);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 module.exports = router;

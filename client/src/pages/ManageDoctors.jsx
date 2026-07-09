@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { doctorsAPI } from '../services/api';
-import { Plus, Edit2, Trash2, X, Search, ShieldAlert } from 'lucide-react';
+import { Plus, Edit2, Trash2, X, Search, ShieldAlert, Award, Clock } from 'lucide-react';
 
 const ManageDoctors = () => {
   const [doctors, setDoctors] = useState([]);
@@ -15,7 +15,10 @@ const ManageDoctors = () => {
     specialization: '',
     qualification: '',
     image: '',
-    description: ''
+    description: '',
+    experienceYears: 5,
+    availableTimingsRaw: '09:00 AM - 12:00 PM, 02:00 PM - 05:00 PM',
+    status: 'Available'
   });
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
@@ -37,7 +40,16 @@ const ManageDoctors = () => {
 
   const handleOpenAdd = () => {
     setEditingDoc(null);
-    setFormData({ name: '', specialization: '', qualification: '', image: '', description: '' });
+    setFormData({
+      name: '',
+      specialization: '',
+      qualification: '',
+      image: '',
+      description: '',
+      experienceYears: 5,
+      availableTimingsRaw: '09:00 AM - 12:00 PM, 02:00 PM - 05:00 PM',
+      status: 'Available'
+    });
     setError('');
     setModalOpen(true);
   };
@@ -49,7 +61,10 @@ const ManageDoctors = () => {
       specialization: doc.specialization,
       qualification: doc.qualification,
       image: doc.image,
-      description: doc.description
+      description: doc.description,
+      experienceYears: doc.experienceYears || 5,
+      availableTimingsRaw: doc.availableTimings ? doc.availableTimings.join(', ') : '09:00 AM - 12:00 PM, 02:00 PM - 05:00 PM',
+      status: doc.status || 'Available'
     });
     setError('');
     setModalOpen(true);
@@ -70,12 +85,27 @@ const ManageDoctors = () => {
     setError('');
     setSaving(true);
 
+    const processedTimings = formData.availableTimingsRaw
+      ? formData.availableTimingsRaw.split(',').map(s => s.trim()).filter(s => s.length > 0)
+      : ["09:00 AM - 12:00 PM", "02:00 PM - 05:00 PM"];
+
+    const submitData = {
+      name: formData.name,
+      specialization: formData.specialization,
+      qualification: formData.qualification,
+      image: formData.image,
+      description: formData.description,
+      experienceYears: Number(formData.experienceYears) || 5,
+      availableTimings: processedTimings,
+      status: formData.status
+    };
+
     try {
       if (editingDoc) {
-        const res = await doctorsAPI.update(editingDoc._id, formData);
+        const res = await doctorsAPI.update(editingDoc._id, submitData);
         setDoctors(doctors.map(d => d._id === editingDoc._id ? res.data : d));
       } else {
-        const res = await doctorsAPI.create(formData);
+        const res = await doctorsAPI.create(submitData);
         setDoctors([res.data, ...doctors]);
       }
       setModalOpen(false);
@@ -134,11 +164,28 @@ const ManageDoctors = () => {
                   <span className="absolute bottom-3 left-3 bg-teal-600 text-white text-[10px] uppercase font-bold py-1 px-2.5 rounded-lg">
                     {doc.specialization}
                   </span>
+                  <span className={`absolute top-3 right-3 text-[10px] font-bold px-2 py-0.5 rounded-md border ${
+                    doc.status === 'Available' 
+                      ? 'bg-emerald-50 text-emerald-800 border-emerald-200' 
+                      : 'bg-rose-50 text-rose-800 border-rose-200'
+                  }`}>
+                    {doc.status || 'Available'}
+                  </span>
                 </div>
-                <div className="p-6 space-y-2">
-                  <h3 className="font-extrabold text-slate-800 text-base">{doc.name}</h3>
+                <div className="p-6 space-y-3">
+                  <div className="flex justify-between items-start gap-2">
+                    <h3 className="font-extrabold text-slate-800 text-base leading-tight">{doc.name}</h3>
+                  </div>
                   <p className="text-emerald-600 text-xs font-bold">{doc.qualification}</p>
-                  <p className="text-slate-500 text-xs leading-relaxed line-clamp-3">{doc.description}</p>
+                  
+                  <div className="flex gap-4 pt-1 text-slate-400 text-xs font-semibold">
+                    <span className="flex items-center gap-1">
+                      <Award className="w-3.5 h-3.5 text-slate-400" />
+                      {doc.experienceYears || 5} Yrs Experience
+                    </span>
+                  </div>
+
+                  <p className="text-slate-500 text-xs leading-relaxed line-clamp-2">{doc.description}</p>
                 </div>
               </div>
               
@@ -229,12 +276,50 @@ const ManageDoctors = () => {
                 </div>
               </div>
 
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Experience (Years)</label>
+                  <input
+                    type="number"
+                    required
+                    min="0"
+                    placeholder="5"
+                    value={formData.experienceYears}
+                    onChange={(e) => setFormData({...formData, experienceYears: e.target.value})}
+                    className="w-full bg-slate-50/50 border border-slate-200 focus:border-teal-500 focus:bg-white focus:outline-none rounded-xl px-4 py-3 text-sm transition-all"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Availability Status</label>
+                  <select
+                    value={formData.status}
+                    onChange={(e) => setFormData({...formData, status: e.target.value})}
+                    className="w-full bg-slate-50/50 border border-slate-200 focus:border-teal-500 focus:bg-white focus:outline-none rounded-xl px-4 py-3 text-sm transition-all appearance-none cursor-pointer"
+                  >
+                    <option value="Available">Available</option>
+                    <option value="Unavailable">Unavailable</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Available Timings (comma separated)</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="09:00 AM - 12:00 PM, 02:00 PM - 05:00 PM"
+                  value={formData.availableTimingsRaw}
+                  onChange={(e) => setFormData({...formData, availableTimingsRaw: e.target.value})}
+                  className="w-full bg-slate-50/50 border border-slate-200 focus:border-teal-500 focus:bg-white focus:outline-none rounded-xl px-4 py-3 text-sm transition-all"
+                />
+              </div>
+
               <div className="space-y-1">
                 <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Image URL (or Base64)</label>
                 <input
                   type="text"
                   required
-                  placeholder="https://example.com/doctor-photo.jpg"
+                  placeholder="https://images.unsplash.com/..."
                   value={formData.image}
                   onChange={(e) => setFormData({...formData, image: e.target.value})}
                   className="w-full bg-slate-50/50 border border-slate-200 focus:border-teal-500 focus:bg-white focus:outline-none rounded-xl px-4 py-3 text-sm transition-all"
@@ -258,14 +343,14 @@ const ManageDoctors = () => {
                 <button
                   type="button"
                   onClick={() => setModalOpen(false)}
-                  className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-3 rounded-xl transition-all text-sm"
+                  className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-3 rounded-xl transition-all text-sm cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={saving}
-                  className="flex-1 bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 rounded-xl transition-all text-sm shadow-md shadow-teal-100 disabled:opacity-50"
+                  className="flex-1 bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 rounded-xl transition-all text-sm shadow-md shadow-teal-100 disabled:opacity-50 cursor-pointer"
                 >
                   {saving ? 'Saving...' : 'Save Profile'}
                 </button>

@@ -30,10 +30,13 @@ export const usersAPI = {
   register: (data) => api.post('/users/register', data),
   login: (email, password) => api.post('/users/login', { email, password }),
   getProfile: () => api.get('/users/profile'),
+  updateProfile: (data) => api.put('/users/profile', data),
+  getAll: () => api.get('/users'), // Admin only
 };
 
 export const doctorsAPI = {
   getAll: () => api.get('/doctors'),
+  getById: (id) => api.get(`/doctors/${id}`),
   create: (data) => api.post('/doctors', data),
   update: (id, data) => api.put(`/doctors/${id}`, data),
   delete: (id) => api.delete(`/doctors/${id}`),
@@ -74,6 +77,27 @@ export const galleryAPI = {
 export const settingsAPI = {
   get: () => api.get('/settings'),
   update: (data) => api.put('/settings', data),
+};
+
+export const medicalRecordsAPI = {
+  getByUserId: (userId) => api.get(`/medical-records/user/${userId}`),
+  getAll: () => api.get('/medical-records'),
+  create: (data) => api.post('/medical-records', data),
+  update: (id, data) => api.put(`/medical-records/${id}`, data),
+  delete: (id) => api.delete(`/medical-records/${id}`),
+};
+
+export const notificationsAPI = {
+  getAll: () => api.get('/notifications'),
+  markAsRead: (id) => api.put(`/notifications/${id}/read`),
+  markAllAsRead: () => api.put('/notifications/read-all'),
+};
+
+export const faqsAPI = {
+  getAll: () => api.get('/faqs'),
+  create: (data) => api.post('/faqs', data),
+  update: (id, data) => api.put(`/faqs/${id}`, data),
+  delete: (id) => api.delete(`/faqs/${id}`),
 };
 
 export default api;

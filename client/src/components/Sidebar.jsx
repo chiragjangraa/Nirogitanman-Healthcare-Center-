@@ -2,7 +2,7 @@ import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { 
   LayoutDashboard, Users, Activity, Calendar, 
-  MessageSquare, BookOpen, Image, Settings, LogOut, Heart 
+  MessageSquare, BookOpen, Image, Settings, LogOut, Heart, FileText, HelpCircle 
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
@@ -20,9 +20,11 @@ const Sidebar = () => {
     { name: 'Doctors', path: '/admin/dashboard/doctors', icon: Users },
     { name: 'Services', path: '/admin/dashboard/services', icon: Activity },
     { name: 'Appointments', path: '/admin/dashboard/appointments', icon: Calendar },
+    { name: 'Medical Records', path: '/admin/dashboard/medical-records', icon: FileText },
     { name: 'Messages', path: '/admin/dashboard/messages', icon: MessageSquare },
     { name: 'Blogs', path: '/admin/dashboard/blogs', icon: BookOpen },
     { name: 'Gallery', path: '/admin/dashboard/gallery', icon: Image },
+    { name: 'FAQs', path: '/admin/dashboard/faqs', icon: HelpCircle },
     { name: 'Settings', path: '/admin/dashboard/settings', icon: Settings },
   ];
 

@@ -1,23 +1,29 @@
 import React, { useEffect, useState } from 'react';
-import { appointmentsAPI } from '../services/api';
-import { Search, Calendar, ShieldCheck, Clock, XCircle, CheckCircle } from 'lucide-react';
+import { appointmentsAPI, doctorsAPI } from '../services/api';
+import { Search, Calendar, ShieldCheck, Clock, XCircle, CheckCircle, User } from 'lucide-react';
 
 const ManageAppointments = () => {
   const [appointments, setAppointments] = useState([]);
+  const [doctorsList, setDoctorsList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
+  const [doctorFilter, setDoctorFilter] = useState('All');
 
   useEffect(() => {
-    fetchAppointments();
+    fetchData();
   }, []);
 
-  const fetchAppointments = async () => {
+  const fetchData = async () => {
     try {
-      const res = await appointmentsAPI.getAll();
-      setAppointments(res.data);
+      const [apptRes, docsRes] = await Promise.all([
+        appointmentsAPI.getAll(),
+        doctorsAPI.getAll()
+      ]);
+      setAppointments(apptRes.data);
+      setDoctorsList(docsRes.data);
     } catch (err) {
-      console.error('Failed to load appointments list', err);
+      console.error('Failed to load appointments list or doctor list', err);
     } finally {
       setLoading(false);
     }
@@ -52,34 +58,51 @@ const ManageAppointments = () => {
       appt.phone.includes(searchTerm);
       
     const matchesStatus = statusFilter === 'All' || appt.status === statusFilter;
+    const matchesDoctor = doctorFilter === 'All' || appt.doctor === doctorFilter;
     
-    return matchesSearch && matchesStatus;
+    return matchesSearch && matchesStatus && matchesDoctor;
   });
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 font-sans">
       {/* Header card */}
       <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
         <h2 className="text-xl font-bold text-slate-800">Appointment Bookings</h2>
-        <p className="text-slate-500 text-xs sm:text-sm">View patient appointments, check preferred dates, and update confirmation status.</p>
+        <p className="text-slate-500 text-xs sm:text-sm font-medium">View patient appointments, check preferred dates, and update confirmation status.</p>
       </div>
 
       {/* Filters and Search */}
-      <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex flex-col md:flex-row gap-4 items-center justify-between">
-        {/* Search */}
-        <div className="flex bg-slate-50 px-4 py-2.5 rounded-xl border border-slate-200 items-center gap-2.5 w-full md:max-w-md">
-          <Search className="w-5 h-5 text-slate-400 shrink-0" />
-          <input
-            type="text"
-            placeholder="Search by patient name, doctor, or phone..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="bg-transparent text-sm focus:outline-none text-slate-700 placeholder-slate-400 w-full"
-          />
+      <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex flex-col gap-4">
+        <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+          {/* Search */}
+          <div className="flex bg-slate-50 px-4 py-2.5 rounded-xl border border-slate-200 items-center gap-2.5 w-full md:max-w-md">
+            <Search className="w-5 h-5 text-slate-400 shrink-0" />
+            <input
+              type="text"
+              placeholder="Search by patient name, doctor, or phone..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="bg-transparent text-sm focus:outline-none text-slate-700 placeholder-slate-400 w-full"
+            />
+          </div>
+
+          {/* Doctor filter dropdown */}
+          <div className="w-full md:w-64">
+            <select
+              value={doctorFilter}
+              onChange={(e) => setDoctorFilter(e.target.value)}
+              className="w-full bg-slate-50 border border-slate-200 focus:outline-none rounded-xl px-4 py-2.5 text-sm cursor-pointer"
+            >
+              <option value="All">Filter by Doctor: All</option>
+              {doctorsList.map(doc => (
+                <option key={doc._id} value={doc.name}>{doc.name}</option>
+              ))}
+            </select>
+          </div>
         </div>
 
         {/* Status filters */}
-        <div className="flex gap-2 shrink-0 overflow-x-auto w-full md:w-auto">
+        <div className="flex gap-2 overflow-x-auto pb-1">
           {['All', 'Pending', 'Approved', 'Completed', 'Cancelled'].map((status) => (
             <button
               key={status}
@@ -104,12 +127,12 @@ const ManageAppointments = () => {
       ) : filteredAppointments.length > 0 ? (
         <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse min-w-[700px]">
+            <table className="w-full text-left border-collapse min-w-[750px]">
               <thead>
                 <tr className="border-b border-slate-100 text-xs font-bold text-slate-400 uppercase tracking-wider bg-slate-50/50">
                   <th className="py-4 px-6">Patient Details</th>
                   <th className="py-4 px-6">Assigned Doctor</th>
-                  <th className="py-4 px-6">Booking Date</th>
+                  <th className="py-4 px-6">Date & Slot</th>
                   <th className="py-4 px-6">Status</th>
                   <th className="py-4 px-6 text-center">Actions</th>
                 </tr>
@@ -132,9 +155,14 @@ const ManageAppointments = () => {
 
                     {/* Date */}
                     <td className="py-4 px-6">
-                      <div className="flex items-center gap-1.5 text-slate-500 text-xs font-medium">
-                        <Calendar className="w-4 h-4 text-teal-600" />
-                        <span>{appt.date}</span>
+                      <div className="flex flex-col gap-0.5 text-slate-500 text-xs font-semibold">
+                        <span className="flex items-center gap-1">
+                          <Calendar className="w-3.5 h-3.5 text-teal-600 shrink-0" />
+                          <span>{appt.date}</span>
+                        </span>
+                        <span className="flex items-center gap-1 pl-4.5 text-[10px] text-slate-400 font-bold">
+                          {appt.timeSlot || 'Any Time'}
+                        </span>
                       </div>
                     </td>
 
@@ -153,14 +181,14 @@ const ManageAppointments = () => {
                             <button
                               onClick={() => handleStatusChange(appt._id, 'Approved')}
                               title="Approve Booking"
-                              className="bg-emerald-50 hover:bg-emerald-500 hover:text-white text-emerald-700 border border-emerald-200 hover:border-emerald-500 p-1.5 rounded-lg transition-all"
+                              className="bg-emerald-50 hover:bg-emerald-500 hover:text-white text-emerald-700 border border-emerald-200 hover:border-emerald-500 p-1.5 rounded-lg transition-all cursor-pointer"
                             >
                               <ShieldCheck className="w-4 h-4" />
                             </button>
                             <button
                               onClick={() => handleStatusChange(appt._id, 'Cancelled')}
                               title="Cancel Booking"
-                              className="bg-rose-50 hover:bg-rose-500 hover:text-white text-rose-700 border border-rose-200 hover:border-rose-500 p-1.5 rounded-lg transition-all"
+                              className="bg-rose-50 hover:bg-rose-500 hover:text-white text-rose-700 border border-rose-200 hover:border-rose-500 p-1.5 rounded-lg transition-all cursor-pointer"
                             >
                               <XCircle className="w-4 h-4" />
                             </button>
@@ -172,14 +200,14 @@ const ManageAppointments = () => {
                             <button
                               onClick={() => handleStatusChange(appt._id, 'Completed')}
                               title="Complete Booking"
-                              className="bg-sky-50 hover:bg-sky-500 hover:text-white text-sky-700 border border-sky-200 hover:border-sky-500 p-1.5 rounded-lg transition-all"
+                              className="bg-sky-50 hover:bg-sky-500 hover:text-white text-sky-700 border border-sky-200 hover:border-sky-500 p-1.5 rounded-lg transition-all cursor-pointer"
                             >
                               <CheckCircle className="w-4 h-4" />
                             </button>
                             <button
                               onClick={() => handleStatusChange(appt._id, 'Cancelled')}
                               title="Cancel Booking"
-                              className="bg-rose-50 hover:bg-rose-500 hover:text-white text-rose-700 border border-rose-200 hover:border-rose-500 p-1.5 rounded-lg transition-all"
+                              className="bg-rose-50 hover:bg-rose-500 hover:text-white text-rose-700 border border-rose-200 hover:border-rose-500 p-1.5 rounded-lg transition-all cursor-pointer"
                             >
                               <XCircle className="w-4 h-4" />
                             </button>
