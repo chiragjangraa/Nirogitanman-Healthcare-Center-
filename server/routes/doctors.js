@@ -1,6 +1,5 @@
 const express = require('express');
 const router = express.Router();
-const Doctor = require('../models/Doctor');
 const mockDb = require('../config/mockDb');
 const { dbState } = require('../config/db');
 const auth = require('../middleware/auth');
@@ -14,6 +13,7 @@ router.get('/', async (req, res) => {
     if (dbState.isMock) {
       doctors = mockDb.find('doctors');
     } else {
+      const Doctor = require('../models/Doctor');
       doctors = await Doctor.find().sort({ createdAt: -1 });
     }
     res.json(doctors);
@@ -32,6 +32,7 @@ router.get('/:id', async (req, res) => {
     if (dbState.isMock) {
       doctor = mockDb.findById('doctors', req.params.id);
     } else {
+      const Doctor = require('../models/Doctor');
       doctor = await Doctor.findById(req.params.id);
     }
 
@@ -69,6 +70,7 @@ router.post('/', auth, async (req, res) => {
         status: status || 'Available'
       });
     } else {
+      const Doctor = require('../models/Doctor');
       newDoc = new Doctor({ 
         name, 
         specialization, 
@@ -108,6 +110,7 @@ router.put('/:id', auth, async (req, res) => {
         status
       });
     } else {
+      const Doctor = require('../models/Doctor');
       updatedDoc = await Doctor.findByIdAndUpdate(
         req.params.id,
         { name, specialization, qualification, image, description, experienceYears: Number(experienceYears), availableTimings, status },
@@ -134,6 +137,7 @@ router.delete('/:id', auth, async (req, res) => {
     if (dbState.isMock) {
       deletedDoc = mockDb.findByIdAndDelete('doctors', req.params.id);
     } else {
+      const Doctor = require('../models/Doctor');
       deletedDoc = await Doctor.findByIdAndDelete(req.params.id);
     }
 

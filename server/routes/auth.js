@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const Admin = require('../models/Admin');
 const mockDb = require('../config/mockDb');
 const { dbState } = require('../config/db');
 const auth = require('../middleware/auth');
@@ -15,14 +14,15 @@ router.post('/login', async (req, res) => {
 
   try {
     if (!email || !password) {
-      return res.status(400).json({ message: 'Please enter all fields' });
+      return res.status(400).json({ message: 'Please enter email and password' });
     }
 
     let admin = null;
     if (dbState.isMock) {
-      admin = mockDb.findOne('admins', { email });
+      admin = mockDb.findOne('admins', { email: email.toLowerCase().trim() });
     } else {
-      admin = await Admin.findOne({ email });
+      const Admin = require('../models/Admin');
+      admin = await Admin.findOne({ email: email.toLowerCase().trim() });
     }
 
     if (!admin) {
@@ -37,34 +37,32 @@ router.post('/login', async (req, res) => {
     const payload = {
       id: admin._id,
       email: admin.email,
-      role: admin.role
+      role: admin.role || 'admin'
     };
 
-    jwt.sign(
+    const token = jwt.sign(
       payload,
-      process.env.JWT_SECRET || 'nirogitanman_secret_key_123_abc_xyz',
-      { expiresIn: '24h' },
-      (err, token) => {
-        if (err) throw err;
-        res.json({
-          token,
-          user: {
-            id: admin._id,
-            name: admin.name,
-            email: admin.email,
-            role: admin.role
-          }
-        });
-      }
+      process.env.JWT_SECRET || 'nirogitanman_jwt_secret_key_2024_secure',
+      { expiresIn: '7d' }
     );
+
+    res.json({
+      token,
+      user: {
+        id: admin._id,
+        name: admin.name,
+        email: admin.email,
+        role: admin.role || 'admin'
+      }
+    });
   } catch (err) {
-    console.error('Login error:', err.message);
+    console.error('Admin login error:', err.message);
     res.status(500).json({ message: 'Server error' });
   }
 });
 
 // @route   GET api/auth/me
-// @desc    Get current admin user
+// @desc    Get current admin or user session info
 // @access  Private
 router.get('/me', auth, (req, res) => {
   res.json(req.user);

@@ -22,6 +22,7 @@ import ManageGallery from './pages/ManageGallery';
 import ManageSettings from './pages/ManageSettings';
 import ManageMedicalRecords from './pages/ManageMedicalRecords';
 import ManageFAQs from './pages/ManageFAQs';
+import ManagePatients from './pages/ManagePatients';
 
 // Public Pages Additional
 import DoctorDetail from './pages/DoctorDetail';
@@ -71,6 +72,11 @@ function App() {
             <Route 
               path="doctors" 
               element={<ManageDoctors />} 
+            />
+
+            <Route 
+              path="patients" 
+              element={<ManagePatients />} 
             />
 
             <Route 

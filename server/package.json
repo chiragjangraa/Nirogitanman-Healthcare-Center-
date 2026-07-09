@@ -1,6 +1,6 @@
 {
   "name": "nirogitanman-server",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Backend API for Nirogitanman Healthcare Website",
   "main": "server.js",
   "scripts": {
@@ -12,7 +12,9 @@
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
-    "jsonwebtoken": "^9.0.2",
+    "jsonwebtoken": "^9.0.2"
+  },
+  "optionalDependencies": {
     "mongoose": "^8.3.1"
   },
   "devDependencies": {

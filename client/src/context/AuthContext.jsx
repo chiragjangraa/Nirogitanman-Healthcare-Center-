@@ -15,16 +15,18 @@ export const AuthProvider = ({ children }) => {
         return;
       }
 
-      // Configure default headers
+      // Set auth header for all requests
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 
       try {
+        // Try to restore user session — /api/auth/me works for both admin & user tokens
         const res = await axios.get('/api/auth/me');
         setUser(res.data);
       } catch (err) {
-        console.error('Failed to load user:', err.response?.data?.message || err.message);
-        // Clear invalid token
+        console.error('Session restore failed:', err.response?.data?.message || err.message);
+        // Clear stale token
         localStorage.removeItem('token');
+        localStorage.removeItem('userInfo');
         setToken(null);
         setUser(null);
         delete axios.defaults.headers.common['Authorization'];
@@ -36,11 +38,12 @@ export const AuthProvider = ({ children }) => {
     loadUser();
   }, [token]);
 
+  // Regular user login
   const login = async (email, password) => {
     try {
       const res = await axios.post('/api/users/login', { email, password });
       const { token: newToken, user: newUser } = res.data;
-      
+
       localStorage.setItem('token', newToken);
       axios.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
       setToken(newToken);
@@ -52,24 +55,26 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Admin login (separate endpoint)
   const loginAdmin = async (email, password) => {
     try {
       const res = await axios.post('/api/auth/login', { email, password });
       const { token: newToken, user: newUser } = res.data;
-      
+
       localStorage.setItem('token', newToken);
       axios.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
       setToken(newToken);
       setUser(newUser);
       return { success: true, role: newUser.role };
     } catch (err) {
-      const errorMsg = err.response?.data?.message || 'Login failed. Please check your credentials.';
+      const errorMsg = err.response?.data?.message || 'Admin login failed. Please check credentials.';
       return { success: false, error: errorMsg };
     }
   };
 
   const logout = () => {
     localStorage.removeItem('token');
+    localStorage.removeItem('userInfo');
     delete axios.defaults.headers.common['Authorization'];
     setToken(null);
     setUser(null);

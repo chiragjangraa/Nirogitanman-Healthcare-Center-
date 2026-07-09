@@ -1,0 +1,97 @@
+{
+  "admins": [
+    {
+      "_id": "ienl6fa",
+      "name": "Nirogitanman Admin",
+      "email": "admin@nirogitanman.com",
+      "password": "$2a$10$7DAild1iVHMWw/uRZL4HlecAVyOVycNr6lNsviKubZpJbZdSDuIX.",
+      "role": "admin",
+      "createdAt": "2026-07-09T10:40:46.580Z"
+    }
+  ],
+  "doctors": [
+    {
+      "_id": "doc1",
+      "name": "Dr. Alok Sharma",
+      "specialization": "Cardiology",
+      "qualification": "MD, DM (Cardiology) - 15+ Yrs Exp",
+      "image": "https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&q=80&w=400",
+      "description": "Expert in interventional cardiology, heart failure management, and preventive cardiac care."
+    },
+    {
+      "_id": "doc2",
+      "name": "Dr. Priya Patel",
+      "specialization": "Pediatrics",
+      "qualification": "MBBS, MD (Pediatrics) - 12+ Yrs Exp",
+      "image": "https://images.unsplash.com/photo-1594824813573-246434de83fb?auto=format&fit=crop&q=80&w=400",
+      "description": "Dedicated to providing compassionate care for infants, children, and adolescents."
+    },
+    {
+      "_id": "doc3",
+      "name": "Dr. Rajesh Verma",
+      "specialization": "Orthopedics",
+      "qualification": "MS (Ortho), MCh (Ortho) - 18+ Yrs Exp",
+      "image": "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&q=80&w=400",
+      "description": "Specialist in joint replacements, sports injuries, and advanced arthroscopic surgeries."
+    }
+  ],
+  "services": [
+    {
+      "_id": "srv1",
+      "title": "General Checkup",
+      "description": "Comprehensive health evaluations, routine checkups, and preventive screening for all age groups.",
+      "image": "https://images.unsplash.com/photo-1505751172876-fa1923c5c528?auto=format&fit=crop&q=80&w=400"
+    },
+    {
+      "_id": "srv2",
+      "title": "Cardiac Care",
+      "description": "Advanced diagnostic testing, ECG, Echo, and expert consultation for various cardiovascular conditions.",
+      "image": "https://images.unsplash.com/photo-1530026405186-ed1ea0ac7a63?auto=format&fit=crop&q=80&w=400"
+    },
+    {
+      "_id": "srv3",
+      "title": "Pediatric Consultation",
+      "description": "Immunization, developmental tracking, and complete healthcare solutions for children.",
+      "image": "https://images.unsplash.com/photo-1581594693702-fbdc51b2763b?auto=format&fit=crop&q=80&w=400"
+    }
+  ],
+  "appointments": [],
+  "messages": [],
+  "users": [],
+  "medicalRecords": [],
+  "notifications": [],
+  "blogs": [
+    {
+      "_id": "blog1",
+      "title": "5 Tips to Keep Your Heart Healthy",
+      "content": "A healthy lifestyle is the key to preventing heart disease. Start by eating a balanced diet rich in fiber, exercising at least 30 minutes daily, avoiding smoking, managing stress levels, and getting regular health checkups.",
+      "image": "https://images.unsplash.com/photo-1506126613408-eca07ce68773?auto=format&fit=crop&q=80&w=400",
+      "author": "Dr. Alok Sharma",
+      "date": "2026-07-09T10:40:44.284Z"
+    }
+  ],
+  "gallery": [
+    {
+      "_id": "gal1",
+      "imageUrl": "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&q=80&w=400",
+      "title": "Our Diagnostic Center"
+    },
+    {
+      "_id": "gal2",
+      "imageUrl": "https://images.unsplash.com/photo-1584515901387-a7f18e26524b?auto=format&fit=crop&q=80&w=400",
+      "title": "Modern ICU Unit"
+    }
+  ],
+  "settings": {
+    "siteName": "Nirogitanman Healthcare",
+    "email": "contact@nirogitanman.com",
+    "phone": "+91 98765 43210",
+    "address": "123, Wellness Enclave, Health City, Sector 5, New Delhi - 110001",
+    "workingHours": "Mon - Sat: 8:00 AM - 8:00 PM, Sun: Emergency Only",
+    "socialLinks": {
+      "facebook": "https://facebook.com/nirogitanman",
+      "twitter": "https://twitter.com/nirogitanman",
+      "instagram": "https://instagram.com/nirogitanman"
+    }
+  }
+}

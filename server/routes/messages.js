@@ -1,6 +1,5 @@
 const express = require('express');
 const router = express.Router();
-const Message = require('../models/Message');
 const mockDb = require('../config/mockDb');
 const { dbState } = require('../config/db');
 const auth = require('../middleware/auth');
@@ -20,6 +19,7 @@ router.post('/', async (req, res) => {
     if (dbState.isMock) {
       newMessage = mockDb.create('messages', { name, email, message });
     } else {
+      const Message = require('../models/Message');
       newMessage = new Message({ name, email, message });
       await newMessage.save();
     }
@@ -39,6 +39,7 @@ router.get('/', auth, async (req, res) => {
     if (dbState.isMock) {
       messages = mockDb.find('messages');
     } else {
+      const Message = require('../models/Message');
       messages = await Message.find().sort({ createdAt: -1 });
     }
     res.json(messages);
@@ -57,6 +58,7 @@ router.delete('/:id', auth, async (req, res) => {
     if (dbState.isMock) {
       deletedMessage = mockDb.findByIdAndDelete('messages', req.params.id);
     } else {
+      const Message = require('../models/Message');
       deletedMessage = await Message.findByIdAndDelete(req.params.id);
     }
 

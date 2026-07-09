@@ -19,8 +19,10 @@ const Home = ({ initialSection }) => {
     phone: '',
     email: '',
     doctor: '',
-    date: ''
+    date: '',
+    timeSlot: ''
   });
+  const selectedDoctor = doctors.find(d => d.name === apptForm.doctor);
   const [apptStatus, setApptStatus] = useState({ type: '', message: '' });
 
   // Contact Form State
@@ -64,8 +66,8 @@ const Home = ({ initialSection }) => {
     setApptStatus({ type: 'loading', message: 'Submitting your request...' });
     try {
       await appointmentsAPI.create(apptForm);
-      setApptStatus({ type: 'success', message: 'Appointment requested successfully! We will contact you soon.' });
-      setApptForm({ patientName: '', phone: '', email: '', doctor: '', date: '' });
+      setApptStatus({ type: 'success', message: '✓ Appointment requested successfully! We will contact you to confirm your slot.' });
+      setApptForm({ patientName: '', phone: '', email: '', doctor: '', date: '', timeSlot: '' });
     } catch (err) {
       setApptStatus({ type: 'error', message: err.response?.data?.message || 'Something went wrong. Please try again.' });
     }
@@ -651,12 +653,12 @@ const Home = ({ initialSection }) => {
                     <select
                       required
                       value={apptForm.doctor}
-                      onChange={(e) => setApptForm({...apptForm, doctor: e.target.value})}
+                      onChange={(e) => setApptForm({...apptForm, doctor: e.target.value, timeSlot: ''})}
                       className="w-full bg-white border border-slate-200 focus:border-teal-500 focus:outline-none rounded-xl px-4 py-3 text-sm transition-all appearance-none cursor-pointer"
                     >
                       <option value="">Select Doctor</option>
                       {doctors.length > 0 ? (
-                        doctors.map((d) => <option key={d._id} value={d.name}>{d.name} ({d.specialization})</option>)
+                        doctors.filter(d => d.status !== 'Unavailable').map((d) => <option key={d._id} value={d.name}>{d.name} ({d.specialization})</option>)
                       ) : (
                         <>
                           <option value="Dr. Alok Sharma">Dr. Alok Sharma (Cardiology)</option>
@@ -671,11 +673,33 @@ const Home = ({ initialSection }) => {
                     <input
                       type="date"
                       required
+                      min={new Date().toISOString().split('T')[0]}
                       value={apptForm.date}
                       onChange={(e) => setApptForm({...apptForm, date: e.target.value})}
                       className="w-full bg-white border border-slate-200 focus:border-teal-500 focus:outline-none rounded-xl px-4 py-3 text-sm transition-all cursor-pointer"
                     />
                   </div>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Preferred Time Slot</label>
+                  <select
+                    required
+                    value={apptForm.timeSlot}
+                    onChange={(e) => setApptForm({...apptForm, timeSlot: e.target.value})}
+                    className="w-full bg-white border border-slate-200 focus:border-teal-500 focus:outline-none rounded-xl px-4 py-3 text-sm transition-all appearance-none cursor-pointer"
+                  >
+                    <option value="">Select Time Slot</option>
+                    {selectedDoctor?.availableTimings?.length > 0 ? (
+                      selectedDoctor.availableTimings.map((t, i) => <option key={i} value={t}>{t}</option>)
+                    ) : (
+                      <>
+                        <option value="09:00 AM - 12:00 PM">09:00 AM - 12:00 PM (Morning)</option>
+                        <option value="12:00 PM - 03:00 PM">12:00 PM - 03:00 PM (Afternoon)</option>
+                        <option value="03:00 PM - 06:00 PM">03:00 PM - 06:00 PM (Evening)</option>
+                      </>
+                    )}
+                  </select>
                 </div>
 
                 <button

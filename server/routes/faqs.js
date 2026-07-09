@@ -1,6 +1,5 @@
 const express = require('express');
 const router = express.Router();
-const FAQ = require('../models/FAQ');
 const mockDb = require('../config/mockDb');
 const { dbState } = require('../config/db');
 const auth = require('../middleware/auth');
@@ -14,6 +13,7 @@ router.get('/', async (req, res) => {
     if (dbState.isMock) {
       faqs = mockDb.find('faqs');
     } else {
+      const FAQ = require('../models/FAQ');
       faqs = await FAQ.find().sort({ createdAt: -1 });
     }
     res.json(faqs);
@@ -42,6 +42,7 @@ router.post('/', auth, async (req, res) => {
     if (dbState.isMock) {
       newFaq = mockDb.create('faqs', { question, answer, category: category || 'General' });
     } else {
+      const FAQ = require('../models/FAQ');
       newFaq = new FAQ({ question, answer, category: category || 'General' });
       await newFaq.save();
     }
@@ -68,6 +69,7 @@ router.put('/:id', auth, async (req, res) => {
     if (dbState.isMock) {
       updatedFaq = mockDb.findByIdAndUpdate('faqs', req.params.id, { question, answer, category });
     } else {
+      const FAQ = require('../models/FAQ');
       updatedFaq = await FAQ.findByIdAndUpdate(
         req.params.id,
         { question, answer, category },
@@ -99,6 +101,7 @@ router.delete('/:id', auth, async (req, res) => {
     if (dbState.isMock) {
       deletedFaq = mockDb.findByIdAndDelete('faqs', req.params.id);
     } else {
+      const FAQ = require('../models/FAQ');
       deletedFaq = await FAQ.findByIdAndDelete(req.params.id);
     }
 

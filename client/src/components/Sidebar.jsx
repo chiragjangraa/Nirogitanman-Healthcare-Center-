@@ -2,7 +2,8 @@ import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { 
   LayoutDashboard, Users, Activity, Calendar, 
-  MessageSquare, BookOpen, Image, Settings, LogOut, Heart, FileText, HelpCircle 
+  MessageSquare, BookOpen, Image, Settings, LogOut, Heart, 
+  FileText, HelpCircle, UserCheck, Bell
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
@@ -17,10 +18,11 @@ const Sidebar = () => {
 
   const navItems = [
     { name: 'Overview', path: '/admin/dashboard', icon: LayoutDashboard, end: true },
+    { name: 'Patients', path: '/admin/dashboard/patients', icon: UserCheck },
     { name: 'Doctors', path: '/admin/dashboard/doctors', icon: Users },
-    { name: 'Services', path: '/admin/dashboard/services', icon: Activity },
     { name: 'Appointments', path: '/admin/dashboard/appointments', icon: Calendar },
     { name: 'Medical Records', path: '/admin/dashboard/medical-records', icon: FileText },
+    { name: 'Services', path: '/admin/dashboard/services', icon: Activity },
     { name: 'Messages', path: '/admin/dashboard/messages', icon: MessageSquare },
     { name: 'Blogs', path: '/admin/dashboard/blogs', icon: BookOpen },
     { name: 'Gallery', path: '/admin/dashboard/gallery', icon: Image },
@@ -50,14 +52,14 @@ const Sidebar = () => {
         </div>
 
         {/* Nav list */}
-        <nav className="p-4 space-y-1">
+        <nav className="p-4 space-y-1 overflow-y-auto max-h-[calc(100vh-200px)]">
           {navItems.map((item) => (
             <NavLink
               key={item.name}
               to={item.path}
               end={item.end}
               className={({ isActive }) =>
-                `flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
+                `flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${
                   isActive 
                     ? 'bg-teal-600 text-white shadow-md shadow-teal-900/40' 
                     : 'hover:bg-slate-800 hover:text-white text-slate-400'
@@ -75,7 +77,7 @@ const Sidebar = () => {
       <div className="p-4 border-t border-slate-800">
         <button
           onClick={handleLogout}
-          className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-rose-400 hover:bg-rose-500/10 transition-colors"
+          className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-rose-400 hover:bg-rose-500/10 transition-colors cursor-pointer"
         >
           <LogOut className="w-4 h-4 shrink-0" />
           Logout

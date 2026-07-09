@@ -1,6 +1,4 @@
 const jwt = require('jsonwebtoken');
-const Admin = require('../models/Admin');
-const User = require('../models/User');
 const mockDb = require('../config/mockDb');
 const { dbState } = require('../config/db');
 
@@ -12,18 +10,21 @@ module.exports = async (req, res, next) => {
     }
 
     const token = authHeader.split(' ')[1];
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'nirogitanman_secret_key_123_abc_xyz');
-    
-    let entityUser = null;
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'nirogitanman_jwt_secret_key_2024_secure');
+
     const role = decoded.role || 'user';
+    let entityUser = null;
 
     if (dbState.isMock) {
       const collection = role === 'admin' ? 'admins' : 'users';
       entityUser = mockDb.findOne(collection, { _id: decoded.id });
     } else {
+      // Dynamically require Mongoose models only when MongoDB is connected
       if (role === 'admin') {
+        const Admin = require('../models/Admin');
         entityUser = await Admin.findById(decoded.id).select('-password');
       } else {
+        const User = require('../models/User');
         entityUser = await User.findById(decoded.id).select('-password');
       }
     }
@@ -39,7 +40,7 @@ module.exports = async (req, res, next) => {
       name: entityUser.name,
       phone: entityUser.phone || ''
     };
-    
+
     next();
   } catch (err) {
     console.error('Auth middleware error:', err.message);

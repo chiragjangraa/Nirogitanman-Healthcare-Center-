@@ -2,24 +2,23 @@ const express = require('express');
 const cors = require('cors');
 const bcrypt = require('bcryptjs');
 const dotenv = require('dotenv');
-const { connectDB, dbState } = require('./config/db');
 
-// Load environment variables
+// Load environment variables FIRST
 dotenv.config();
 
 // Initialize express app
 const app = express();
 
 // Middleware
-app.use(cors());
-app.use(express.json({ limit: '50mb' })); // Allow image base64 uploads
+app.use(cors({
+  origin: ['http://localhost:3000', 'http://localhost:5173', 'http://127.0.0.1:3000'],
+  credentials: true
+}));
+app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
-// Connect Database
-connectDB().then(() => {
-  // Seed default admin and initial data
-  seedAdmin();
-});
+// Import DB
+const { connectDB, dbState } = require('./config/db');
 
 // Import Routes
 const authRoutes = require('./routes/auth');
@@ -33,6 +32,7 @@ const galleryRoutes = require('./routes/gallery');
 const settingsRoutes = require('./routes/settings');
 const medicalRecordRoutes = require('./routes/medicalRecords');
 const notificationRoutes = require('./routes/notifications');
+const faqRoutes = require('./routes/faqs');
 
 // Use Routes
 app.use('/api/auth', authRoutes);
@@ -46,32 +46,48 @@ app.use('/api/gallery', galleryRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/medical-records', medicalRecordRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/faqs', faqRoutes);
 
-// Test API Route
+// Test/Health API Route
 app.get('/api/test', (req, res) => {
-  res.json({ message: 'Nirogitanman API is running...', isMockMode: dbState.isMock });
+  res.json({
+    message: 'Nirogitanman API is running...',
+    mode: dbState.isMock ? 'Mock JSON DB' : 'MongoDB',
+    timestamp: new Date().toISOString()
+  });
+});
+
+// 404 handler for unknown API routes
+app.use('/api/*', (req, res) => {
+  res.status(404).json({ message: `API route not found: ${req.method} ${req.originalUrl}` });
 });
 
 // Function to seed default admin
 async function seedAdmin() {
-  const adminEmail = 'admin@nirogitanman.com';
-  const adminPassword = 'admin123';
-  const hashedPassword = await bcrypt.hash(adminPassword, 10);
+  const adminEmail = process.env.ADMIN_EMAIL || 'admin@nirogitanman.com';
+  const adminPassword = process.env.ADMIN_PASSWORD || 'Admin@123';
 
-  if (dbState.isMock) {
-    const mockDb = require('./config/mockDb');
-    const existingAdmin = mockDb.findOne('admins', { email: adminEmail });
-    if (!existingAdmin) {
-      mockDb.create('admins', {
-        name: 'Nirogitanman Admin',
-        email: adminEmail,
-        password: hashedPassword,
-        role: 'admin'
-      });
-      console.log('Seeded default admin in Mock DB.');
-    }
-  } else {
-    try {
+  try {
+    const hashedPassword = await bcrypt.hash(adminPassword, 10);
+
+    if (dbState.isMock) {
+      const mockDb = require('./config/mockDb');
+      const existingAdmin = mockDb.findOne('admins', { email: adminEmail });
+      if (!existingAdmin) {
+        mockDb.create('admins', {
+          name: 'Nirogitanman Admin',
+          email: adminEmail,
+          password: hashedPassword,
+          role: 'admin'
+        });
+        console.log('✓ Default admin created in Mock DB');
+        console.log('  Email:', adminEmail, '| Password:', adminPassword);
+      } else {
+        // Always sync password to ensure it matches .env
+        mockDb.findByIdAndUpdate('admins', existingAdmin._id, { password: hashedPassword });
+        console.log('✓ Admin password synchronized in Mock DB');
+      }
+    } else {
       const Admin = require('./models/Admin');
       const existingAdmin = await Admin.findOne({ email: adminEmail });
       if (!existingAdmin) {
@@ -82,16 +98,34 @@ async function seedAdmin() {
           role: 'admin'
         });
         await newAdmin.save();
-        console.log('Seeded default admin in MongoDB.');
+        console.log('✓ Default admin created in MongoDB');
+        console.log('  Email:', adminEmail, '| Password:', adminPassword);
+      } else {
+        // Always sync password on server start to avoid stale hash issues
+        existingAdmin.password = hashedPassword;
+        await existingAdmin.save();
+        console.log('✓ Admin password synchronized in MongoDB');
       }
-    } catch (err) {
-      console.error('Error seeding admin in MongoDB:', err.message);
     }
+  } catch (err) {
+    console.error('✗ Error seeding admin:', err.message);
   }
 }
+
+// Connect Database then seed admin
+connectDB().then(() => {
+  seedAdmin();
+});
 
 // Start Server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-  console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
+  console.log('\n' + '='.repeat(50));
+  console.log(`🏥 Nirogitanman Healthcare Server`);
+  console.log('='.repeat(50));
+  console.log(`  Port    : ${PORT}`);
+  console.log(`  Mode    : ${process.env.NODE_ENV || 'development'}`);
+  console.log(`  API     : http://localhost:${PORT}/api`);
+  console.log(`  Health  : http://localhost:${PORT}/api/test`);
+  console.log('='.repeat(50) + '\n');
 });

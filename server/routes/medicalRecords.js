@@ -1,6 +1,5 @@
 const express = require('express');
 const router = express.Router();
-const MedicalRecord = require('../models/MedicalRecord');
 const mockDb = require('../config/mockDb');
 const { dbState } = require('../config/db');
 const auth = require('../middleware/auth');
@@ -19,6 +18,7 @@ router.get('/user/:userId', auth, async (req, res) => {
     if (dbState.isMock) {
       records = mockDb.find('medicalRecords', { userId: req.params.userId });
     } else {
+      const MedicalRecord = require('../models/MedicalRecord');
       records = await MedicalRecord.find({ userId: req.params.userId }).sort({ createdAt: -1 });
     }
     res.json(records);
@@ -41,6 +41,7 @@ router.get('/', auth, async (req, res) => {
     if (dbState.isMock) {
       records = mockDb.find('medicalRecords');
     } else {
+      const MedicalRecord = require('../models/MedicalRecord');
       records = await MedicalRecord.find().populate('userId', 'name email phone').sort({ createdAt: -1 });
     }
     res.json(records);
@@ -86,6 +87,7 @@ router.post('/', auth, async (req, res) => {
         isRead: false
       });
     } else {
+      const MedicalRecord = require('../models/MedicalRecord');
       newRecord = new MedicalRecord({
         userId,
         doctorName,
@@ -138,6 +140,7 @@ router.put('/:id', auth, async (req, res) => {
         notes
       });
     } else {
+      const MedicalRecord = require('../models/MedicalRecord');
       updatedRecord = await MedicalRecord.findByIdAndUpdate(
         req.params.id,
         { doctorName, date, diagnosis, prescription, reports, notes },
@@ -169,6 +172,7 @@ router.delete('/:id', auth, async (req, res) => {
     if (dbState.isMock) {
       deletedRecord = mockDb.findByIdAndDelete('medicalRecords', req.params.id);
     } else {
+      const MedicalRecord = require('../models/MedicalRecord');
       deletedRecord = await MedicalRecord.findByIdAndDelete(req.params.id);
     }
 

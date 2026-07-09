@@ -1,6 +1,5 @@
 const express = require('express');
 const router = express.Router();
-const Service = require('../models/Service');
 const mockDb = require('../config/mockDb');
 const { dbState } = require('../config/db');
 const auth = require('../middleware/auth');
@@ -14,6 +13,7 @@ router.get('/', async (req, res) => {
     if (dbState.isMock) {
       services = mockDb.find('services');
     } else {
+      const Service = require('../models/Service');
       services = await Service.find().sort({ createdAt: -1 });
     }
     res.json(services);
@@ -38,6 +38,7 @@ router.post('/', auth, async (req, res) => {
     if (dbState.isMock) {
       newService = mockDb.create('services', { title, description, image });
     } else {
+      const Service = require('../models/Service');
       newService = new Service({ title, description, image });
       await newService.save();
     }
@@ -59,6 +60,7 @@ router.put('/:id', auth, async (req, res) => {
     if (dbState.isMock) {
       updatedService = mockDb.findByIdAndUpdate('services', req.params.id, { title, description, image });
     } else {
+      const Service = require('../models/Service');
       updatedService = await Service.findByIdAndUpdate(
         req.params.id,
         { title, description, image },
@@ -85,6 +87,7 @@ router.delete('/:id', auth, async (req, res) => {
     if (dbState.isMock) {
       deletedService = mockDb.findByIdAndDelete('services', req.params.id);
     } else {
+      const Service = require('../models/Service');
       deletedService = await Service.findByIdAndDelete(req.params.id);
     }
 
