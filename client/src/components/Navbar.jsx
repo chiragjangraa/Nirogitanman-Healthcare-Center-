@@ -121,6 +121,13 @@ const Navbar = () => {
                 >
                   Register
                 </Link>
+                <Link
+  to="/admin/login"
+  className="flex items-center gap-1 text-slate-600 hover:text-emerald-600 px-3 py-2 rounded-xl font-semibold transition-colors"
+>
+  <Shield className="w-4 h-4" />
+  Admin Login
+</Link>
               </>
             )}
 
@@ -218,6 +225,14 @@ const Navbar = () => {
                 >
                   Register Account
                 </Link>
+                <Link
+  to="/admin/login"
+  onClick={() => setIsOpen(false)}
+  className="flex items-center gap-2 py-2 px-3 text-slate-600 hover:bg-slate-50 rounded-lg font-semibold"
+>
+  <Shield className="w-4 h-4" />
+  Admin Login
+</Link>
               </>
             )}
           </div>
