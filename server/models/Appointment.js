@@ -1,6 +1,10 @@
 const mongoose = require('mongoose');
 
 const AppointmentSchema = new mongoose.Schema({
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  },
   patientName: {
     type: String,
     required: true
@@ -18,6 +22,10 @@ const AppointmentSchema = new mongoose.Schema({
     required: true
   },
   date: {
+    type: String,
+    required: true
+  },
+  timeSlot: {
     type: String,
     required: true
   },

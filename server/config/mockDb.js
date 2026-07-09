@@ -54,6 +54,9 @@ const defaultData = {
   ],
   appointments: [],
   messages: [],
+  users: [],
+  medicalRecords: [],
+  notifications: [],
   blogs: [
     {
       _id: "blog1",

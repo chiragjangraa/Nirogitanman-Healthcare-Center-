@@ -31,6 +31,8 @@ const messageRoutes = require('./routes/messages');
 const blogRoutes = require('./routes/blogs');
 const galleryRoutes = require('./routes/gallery');
 const settingsRoutes = require('./routes/settings');
+const medicalRecordRoutes = require('./routes/medicalRecords');
+const notificationRoutes = require('./routes/notifications');
 
 // Use Routes
 app.use('/api/auth', authRoutes);
@@ -42,6 +44,8 @@ app.use('/api/messages', messageRoutes);
 app.use('/api/blogs', blogRoutes);
 app.use('/api/gallery', galleryRoutes);
 app.use('/api/settings', settingsRoutes);
+app.use('/api/medical-records', medicalRecordRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 // Test API Route
 app.get('/api/test', (req, res) => {

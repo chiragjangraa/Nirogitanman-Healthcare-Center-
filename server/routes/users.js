@@ -167,4 +167,47 @@ router.get('/profile', auth, async (req, res) => {
   }
 });
 
+// @route   PUT api/users/profile
+// @desc    Update user profile details (name and phone)
+// @access  Private
+router.put('/profile', auth, async (req, res) => {
+  const { name, phone } = req.body;
+  if (!name || !phone) {
+    return res.status(400).json({ message: 'Please provide name and phone' });
+  }
+  try {
+    if (dbState.isMock) {
+      const updatedUser = mockDb.findByIdAndUpdate('users', req.user.id, { name, phone });
+      if (!updatedUser) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+      return res.json({
+        id: updatedUser._id,
+        name: updatedUser.name,
+        email: updatedUser.email,
+        phone: updatedUser.phone,
+        role: updatedUser.role
+      });
+    } else {
+      const user = await User.findById(req.user.id);
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+      user.name = name;
+      user.phone = phone;
+      await user.save();
+      return res.json({
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        role: user.role
+      });
+    }
+  } catch (err) {
+    console.error('Profile update error:', err.message);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 module.exports = router;
