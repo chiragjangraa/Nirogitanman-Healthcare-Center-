@@ -11,12 +11,7 @@ const app = express();
 
 // Middleware
 app.use(cors({
-  origin: [
-    'http://localhost:3000',
-    'http://localhost:5173',
-    'http://127.0.0.1:3000',
-    'https://nirogitanman-healthcare-center.vercel.app'
-  ],
+  origin: true,
   credentials: true
 }));
 app.use(express.json({ limit: '50mb' }));
