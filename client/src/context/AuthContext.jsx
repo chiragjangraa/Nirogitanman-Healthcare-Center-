@@ -1,5 +1,6 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import axios from 'axios';
+axios.defaults.baseURL = "https://nirogitanman-healthcare-center.onrender.com";
 
 const AuthContext = createContext(null);
 
